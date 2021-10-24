@@ -15,11 +15,16 @@ def synthetic_data(w, b, num_examples):
     return X, y.reshape((-1, 1))
 
 
-true_w = torch.tensor([2, -3.4])
-true_b = 4.2
-features, labels = synthetic_data(true_w, true_b, 1000)
+if __name__ == '__main__':
+    true_w = torch.tensor([2, -3.4])
+    true_b = 4.2
+    features, labels = synthetic_data(true_w, true_b, 1000)
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.scatter3D(features[:, 0].detach().numpy(), features[:, 1].detach().numpy(), labels.detach().numpy())
-plt.show()
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.scatter3D(features[:, 0].detach().numpy(), features[:, 1].detach().numpy(), labels.detach().numpy())
+    plt.show()
+
+
+
+
