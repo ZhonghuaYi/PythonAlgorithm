@@ -32,6 +32,19 @@ def read_csv(file):
     return data
 
 
+# 这是一个生成器
+def data_iter(batch_size, features, labels):
+    num_examples = len(labels)
+    indices = list(range(num_examples))
+    # 这些样本是随机读取的，没有特定的顺序
+    random.shuffle(indices)
+    for i in range(0, num_examples, batch_size):
+        batch_indices = torch.tensor(
+            indices[i:min(i+batch_size, num_examples)]
+        )
+        yield features[batch_size], labels[batch_size]
+
+
 if __name__ == '__main__':
     # 由实际的w与b产生训练数据
     true_w = torch.tensor([2, -3.4])
