@@ -1,5 +1,6 @@
 import random
 import torch
+from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits import mplot3d
@@ -12,7 +13,7 @@ def synthetic_data(w, b, num_examples):
     """生成 y = Xw + b ＋ 噪声"""
     X = torch.normal(-1 ,1, (num_examples, len(w)))
     y = torch.matmul(X, w) + b
-    # y += torch.normal(0, 0.01, y.shape)
+    y += torch.normal(0, 0.01, y.shape)
     return X, y.reshape((-1, 1))
 
 
@@ -29,7 +30,7 @@ def read_csv(file):
     import pandas as pd
     data_frame = pd.read_csv(file)
     data = torch.tensor(np.array(data_frame))
-    return data
+    return data.to(torch.float32)
 
 
 # 这是一个生成器
@@ -42,7 +43,7 @@ def data_iter(batch_size, features, labels):
         batch_indices = torch.tensor(
             indices[i:min(i+batch_size, num_examples)]
         )
-        yield features[batch_size], labels[batch_size]
+        yield features[batch_indices], labels[batch_indices]
 
 
 # 线性回归模型
@@ -55,7 +56,7 @@ def squard_loss(y_hat, y):
     return (y_hat - y) ** 2 / 2
 
 # 定义优化算法为小批量随机梯度下降
-def sgd(params, lr, batchsize):
+def sgd(params, lr, batch_size):
     """params为需要拟合的参数，lr为学习率"""
     with torch.no_grad():
         for param in params:
@@ -64,22 +65,22 @@ def sgd(params, lr, batchsize):
 
 
 if __name__ == '__main__':
-    # # 由实际的w与b产生训练数据
-    # true_w = torch.tensor([2, -3.4])
-    # true_b = 4.2
-    # features, labels = synthetic_data(true_w, true_b, 1000)
+    # 由实际的w与b产生训练数据
+    true_w = torch.tensor([2, -3.4])
+    true_b = 4.2
+    features, labels = synthetic_data(true_w, true_b, 1000)
 
-    # # 将数据写入csv文件
-    # data = torch.cat((features, labels), axis=1).numpy()
-    # os.makedirs(os.path.join('data'), exist_ok=True)
-    # file_path = os.path.join('data', 'linear_regression.csv')
-    # columns_index = ['X[0]', 'X[1]', 'y']
-    # write_csv(data, file_path, columns_index)
+    # 将数据写入csv文件
+    data = torch.cat((features, labels), axis=1).numpy()
+    os.makedirs(os.path.join('data'), exist_ok=True)
+    file_path = os.path.join('data', 'linear_regression.csv')
+    columns_index = ['X[0]', 'X[1]', 'y']
+    write_csv(data, file_path, columns_index)
 
     # 从csv文件中读取数据
     data = read_csv('data/linear_regression.csv')
-    features = data[:, 0:-1].to(torch.float32)
-    labels = data[:, -1].to(torch.float32)
+    features = data[:, 0:-1]
+    labels = data[:, -1]
 
     # # 由X的前两组特征与X对应的标签y画出三维图
     # fig = plt.figure()
@@ -88,17 +89,18 @@ if __name__ == '__main__':
     # plt.show()
 
     # 初始化模型参数
-    w = torch.tensor([2., -3.4], requires_grad=True)
-    b = torch.tensor([1.], requires_grad=True)
+    # w = torch.normal(0, 0.01, size=(2, 1), requires_grad=True)
+    w = torch.tensor([1., -1.], requires_grad=True)
+    b = torch.tensor([0.], requires_grad=True)
 
     true_w = torch.tensor([2, -3.4])
     true_b = 4.2
 
-    lr = 0.01
+    lr = 0.03
     num_epochs = 3
     net = linreg
     loss = squard_loss
-    batch_size = 100
+    batch_size = 50
 
     for epoch in range(num_epochs):
         for X, y in data_iter(batch_size, features, labels):
