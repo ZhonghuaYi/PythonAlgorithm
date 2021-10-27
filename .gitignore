@@ -1,6 +1,9 @@
 ### Example user template template
 ### Example user template
 
+# User Project
+data/FashionMNIST
+
 # IntelliJ project files
 .idea
 *.iml
