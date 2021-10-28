@@ -91,7 +91,7 @@ if __name__ == '__main__':
         train_loss = 0.
         train_num = 0
         for X, y in train_iter:
-            X.resize_(batch_size, num_inputs)
+            X.resize_(batch_size, int(X.numel() / batch_size))
             l = loss(net(X, w, b), y)
             l.sum().backward()
             train_loss += l.sum()
@@ -103,7 +103,7 @@ if __name__ == '__main__':
             accurate_sum = 0.
             test_num = 0
             for X, y in test_iter:
-                X.resize_(batch_size, num_inputs)
+                X.resize_(batch_size, int(X.numel() / batch_size))
                 accurate_sum += accuracy(net(X, w, b), y)
                 test_num += 1
             accurate_rate = accurate_sum / test_num
