@@ -12,10 +12,11 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 def synthetic_data(w, b, num_examples):
     """生成 y = Xw + b ＋ 噪声"""
+    # X = torch.normal(4, 1.4, (num_examples, len(w)))
     X = torch.normal(-1, 1, (num_examples, len(w)))
     y = torch.matmul(X, w) + b
     y += torch.normal(0, 0.01, y.shape)
-    return X, y.reshape((-1, 1))
+    return X, y
 
 
 def write_csv(data, file_path, columns_index):
@@ -70,21 +71,22 @@ def sgd(params, lr, batch_size):
 
 if __name__ == '__main__':
     # 由实际的w与b产生训练数据
-    true_w = torch.tensor([2, -3.4])
-    true_b = 4.2
-    features, labels = synthetic_data(true_w, true_b, 1000)
+    true_w = torch.tensor([3.3, 2.1])
+    true_b = torch.tensor(1.4)
+    features, labels = synthetic_data(true_w, true_b, 50)
+    print(features.shape, labels.shape)
 
     # 将数据写入csv文件
-    data = torch.cat((features, labels), axis=1).numpy()
-    os.makedirs(os.path.join('data'), exist_ok=True)
-    file_path = os.path.join('data', 'linear_regression.csv')
-    columns_index = ['X[0]', 'X[1]', 'y']
-    write_csv(data, file_path, columns_index)
+    # data = torch.cat((features, labels.reshape(-1,1)), axis=1).numpy()
+    # os.makedirs(os.path.join('data'), exist_ok=True)
+    # file_path = os.path.join('data', 'linear_regression.csv')
+    # columns_index = ['X[0]', 'X[1]', 'y']
+    # write_csv(data, file_path, columns_index)
 
-    # 从csv文件中读取数据
-    data = read_csv('data/linear_regression.csv')
-    features = data[:, 0:-1]
-    labels = data[:, -1]
+    # # 从csv文件中读取数据
+    # data = read_csv('data/linear_regression.csv')
+    # features = data[:, 0:-1]
+    # labels = data[:, -1]
 
     # # 由X的前两组特征与X对应的标签y画出三维图
     # fig = plt.figure()
@@ -94,11 +96,10 @@ if __name__ == '__main__':
 
     # 初始化模型参数
     # w = torch.normal(0, 0.01, size=(2, 1), requires_grad=True)
-    w = torch.tensor([1., -1.], requires_grad=True)
-    b = torch.tensor([0.], requires_grad=True)
-
-    true_w = torch.tensor([2, -3.4])
-    true_b = 4.2
+    w = torch.normal(0, 0.1, true_w.shape, requires_grad=True)
+    b = torch.tensor(0., requires_grad=True)
+    # w = torch.tensor([1., -1.], requires_grad=True)
+    # b = torch.tensor([0.], requires_grad=True)
 
     lr = 0.1
     num_epochs = 5
@@ -109,6 +110,7 @@ if __name__ == '__main__':
     for epoch in range(num_epochs):
         for X, y in data_iter(batch_size, features, labels):
             l = loss(net(X, w, b), y)  # X与y的小批量损失
+            print(l)
             l.sum().backward()
             sgd([w, b], lr, batch_size)
 
