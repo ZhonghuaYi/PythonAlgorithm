@@ -5,7 +5,7 @@ import random
 
 
 def data_generate(true_w, true_b, num):
-    X = torch.normal(4, 1.4, (num, len(true_w)))
+    X = torch.normal(0, 1.4, (num, len(true_w)))
     Y = torch.matmul(X, true_w) + true_b
     Y += torch.normal(0, 0.01, Y.shape)
     return X, Y
@@ -52,7 +52,7 @@ def square_loss(y, y_hat):
 def sgd(params, lr, batch_size):
     with torch.no_grad():
         for param in params:
-            param -= lr * param.grad / batch_size
+            param -=  lr * param.grad / batch_size
             param.grad.zero_()
 
 
@@ -61,29 +61,31 @@ if __name__ == "__main__":
     true_w = torch.tensor([3.3, 2.1])
     true_b = torch.tensor(1.4)
     # 通过实际的权重和偏置生成具有高斯噪声的训练数据
-    example_num = 50
+    example_num = 1000
     X, Y_hat = data_generate(true_w, true_b, example_num)
     print(X.shape, Y_hat.shape)
     # 设置初始的用于训练的权重和偏置，并设置requires_grad为True
     w = torch.normal(0, 0.1, true_w.shape, requires_grad=True)
     b = torch.tensor(0., requires_grad=True)
     # 设置模型训练的参数
-    lr = 0.07
+    lr = 0.05
     epoch_num = 5
     batch_size = 50
     net = linear
     loss = square_loss
     # 进行训练
     for epoch in range(epoch_num):
-        for x, y in data_iter(X, Y_hat, batch_size):
-            l = loss(net(x, w, b), y)
-            print(l)
+        for x, y_hat in data_iter(X, Y_hat, batch_size):
+            y = net(x,w,b)
+            l = loss(y, y_hat)
+            # print(y, y_hat, l)
             l.sum().backward()
+            # print(w.grad, b.grad)
             sgd([w, b], lr, batch_size)
-
+        # break
         with torch.no_grad():
-            train_l = loss(net(X, w, b), Y_hat).sum()
-            print(f"epoch{epoch+1}:{train_l}")
+            train_l = loss(net(X, w, b), Y_hat)
+            print(f"epoch{epoch+1}:{train_l.sum()}")
 
     print(f"true_w:{true_w}, true_b:{true_b}")
     print(f"w:{w}, b:{b}")

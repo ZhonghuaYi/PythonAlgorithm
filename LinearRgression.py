@@ -73,7 +73,7 @@ if __name__ == '__main__':
     # 由实际的w与b产生训练数据
     true_w = torch.tensor([3.3, 2.1])
     true_b = torch.tensor(1.4)
-    features, labels = synthetic_data(true_w, true_b, 50)
+    features, labels = synthetic_data(true_w, true_b, 1000)
     print(features.shape, labels.shape)
 
     # 将数据写入csv文件
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     # w = torch.tensor([1., -1.], requires_grad=True)
     # b = torch.tensor([0.], requires_grad=True)
 
-    lr = 0.1
+    lr = 0.07
     num_epochs = 5
     net = linreg
     loss = squard_loss
@@ -110,7 +110,6 @@ if __name__ == '__main__':
     for epoch in range(num_epochs):
         for X, y in data_iter(batch_size, features, labels):
             l = loss(net(X, w, b), y)  # X与y的小批量损失
-            print(l)
             l.sum().backward()
             sgd([w, b], lr, batch_size)
 
