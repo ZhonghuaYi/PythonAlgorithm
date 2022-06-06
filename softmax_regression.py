@@ -48,6 +48,7 @@ def net(X, w, b):
 
 # 定义损失函数（使用的是交叉熵损失函数）
 def loss(y_hat, y):
+    print(y)
     return - torch.log(y_hat[range(len(y_hat)), y])
 
 
@@ -93,6 +94,7 @@ if __name__ == '__main__':
         for X, y in train_iter:
             X.resize_(batch_size, int(X.numel() / batch_size))
             l = loss(net(X, w, b), y)
+            break
             l.sum().backward()
             train_loss += l.sum()
             train_num += 1
@@ -108,6 +110,7 @@ if __name__ == '__main__':
                 test_num += 1
             accurate_rate = accurate_sum / test_num
             print(f'epoch:{epoch+1}, accurate rate:{accurate_rate}, train loss:{train_loss}')
+        break
             
 
 

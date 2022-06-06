@@ -12,12 +12,12 @@ y_hat += torch.normal(0, 0.01, y_hat.shape)
 w = torch.tensor(0., requires_grad=True)
 b = torch.tensor(0., requires_grad=True)
 y = x*w + b
-l = (y-y_hat)**2 / 2
+l = (y-y_hat)**2 / (2*len(y))
 
 # 手动计算导数（梯度）
 with torch.no_grad():
-    w_grad = torch.sum(x*(y-y_hat))
-    b_grad = torch.sum(y-y_hat)
+    w_grad = torch.sum(x*(y-y_hat)) / len(y)
+    b_grad = torch.sum(y-y_hat) / len(y)
     print(f"w_grad:{w_grad}")
     print(f"b_grad:{b_grad}")
 

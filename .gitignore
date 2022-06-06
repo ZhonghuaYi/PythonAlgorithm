@@ -3,6 +3,7 @@
 
 # User Project
 data/FashionMNIST
+data/MNIST
 
 # IntelliJ project files
 .idea
